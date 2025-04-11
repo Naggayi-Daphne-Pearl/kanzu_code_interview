@@ -5,6 +5,7 @@ db.sqlite3
 /api/migrations
 /api/media
 saccomanagement/__pycache__
+db.sqlite3
 
 # Python
 *.pyc
