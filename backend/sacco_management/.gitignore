@@ -82,4 +82,3 @@ coverage.xml
 .pyre/
 
 api/__pycache__
-saccomanagement/__pycache__
