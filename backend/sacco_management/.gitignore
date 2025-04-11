@@ -1,1 +1,6 @@
 .qodo
+db.sqlite3
+.env
+/api/__pycache__
+/api/migrations
+/api/media

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import LoanApplication, UserProfile
+from .models import UserProfile, LoanApplication
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
