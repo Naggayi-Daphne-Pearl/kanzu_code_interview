@@ -11,6 +11,9 @@ from rest_framework.authtoken.models import Token
 # Create your views here.
 
 class UserProfileViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing user profiles.
+    """
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
