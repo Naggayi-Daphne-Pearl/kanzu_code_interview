@@ -200,9 +200,9 @@ export default function Login() {
             ) : null}
           </View>
 
-          <Link href="../forgot-password" style={styles.forgotPassword}>
+          {/* <Link href="../forgot-password" style={styles.forgotPassword}>
             <ThemedText type="link">Forgot password?</ThemedText>
-          </Link>
+          </Link> */}
 
           <TouchableOpacity 
             style={styles.loginButton}
@@ -226,7 +226,7 @@ export default function Login() {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* <View style={styles.signupContainer}>
+          <View style={styles.signupContainer}>
             <ThemedText 
               style={styles.signupText}
               lightColor="#64748b"
@@ -234,10 +234,10 @@ export default function Login() {
             >
               Don't have an account?{' '}
             </ThemedText>
-            <Link href="../signup">
+            <Link href="/auth/signup">
               <ThemedText type="link">Sign up</ThemedText>
             </Link>
-          </View> */}
+          </View>
         </ThemedView>
       </AnimatedView>
     </ThemedView>

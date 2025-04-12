@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,6 +20,10 @@ export default function Signup() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [formError, setFormError] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const router = useRouter();
@@ -32,6 +36,8 @@ export default function Signup() {
     setEmailError('');
     setPasswordError('');
     setFormError('');
+    setFirstNameError('');
+    setLastNameError('');
 
     // Validate username
     if (!username.trim()) {
@@ -57,6 +63,18 @@ export default function Signup() {
       isValid = false;
     }
 
+    // Validate first name
+    if (!firstName.trim()) {
+      setFirstNameError('First name is required');
+      isValid = false;
+    }
+
+    // Validate last name
+    if (!lastName.trim()) {
+      setLastNameError('Last name is required');
+      isValid = false;
+    }
+
     return isValid;
   };
 
@@ -78,6 +96,8 @@ export default function Signup() {
           username: username.trim(),
           email: email.trim(),
           password,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
         }),
       });
 
@@ -108,6 +128,8 @@ export default function Signup() {
       setUsername('');
       setEmail('');
       setPassword('');
+      setFirstName('');
+      setLastName('');
       
       // Show success message and redirect
       Alert.alert(
@@ -136,174 +158,240 @@ export default function Signup() {
         style={styles.backgroundGradient}
       />
 
-      <AnimatedView 
-        entering={FadeInUp.duration(1000)} 
-        style={styles.formContainer}
-      >
-        <View style={styles.header}>
-          <ThemedText 
-            type="title" 
-            style={styles.title}
-            lightColor="#1e293b"
-            darkColor="#f8fafc"
-          >
-            Create Account 🚀
-          </ThemedText>
-          <ThemedText 
-            style={styles.subtitle}
-            lightColor="#64748b"
-            darkColor="#94a3b8"
-          >
-            Sign up to get started
-          </ThemedText>
-        </View>
-
-        <ThemedView 
-          style={styles.form}
-          lightColor="#ffffff"
-          darkColor="#1e293b"
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <AnimatedView 
+          entering={FadeInUp.duration(1000)} 
+          style={styles.formContainer}
         >
-          {formError ? (
-            <View style={styles.formErrorContainer}>
-              <ThemedText style={styles.formErrorText} lightColor="#ef4444" darkColor="#f87171">
-                {formError}
-              </ThemedText>
-            </View>
-          ) : null}
-
-          <View style={styles.inputGroup}>
+          <View style={styles.header}>
             <ThemedText 
-              style={styles.label}
-              lightColor="#475569"
-              darkColor="#94a3b8"
+              type="title" 
+              style={styles.title}
+              lightColor="#1e293b"
+              darkColor="#f8fafc"
             >
-              Username
+              Create Account 🚀
             </ThemedText>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
-                  color: isDark ? '#f8fafc' : '#1e293b',
-                  borderColor: isDark ? '#334155' : '#e2e8f0' },
-                usernameError ? styles.inputError : null
-              ]}
-              placeholder="Enter your username"
-              placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
-              value={username}
-              onChangeText={(text) => {
-                setUsername(text);
-                setUsernameError('');
-              }}
-              autoCapitalize="none"
-            />
-            {usernameError ? (
-              <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
-                {usernameError}
-              </ThemedText>
-            ) : null}
-          </View>
-
-          <View style={styles.inputGroup}>
             <ThemedText 
-              style={styles.label}
-              lightColor="#475569"
-              darkColor="#94a3b8"
-            >
-              Email
-            </ThemedText>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
-                  color: isDark ? '#f8fafc' : '#1e293b',
-                  borderColor: isDark ? '#334155' : '#e2e8f0' },
-                emailError ? styles.inputError : null
-              ]}
-              placeholder="Enter your email"
-              placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setEmailError('');
-              }}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-            {emailError ? (
-              <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
-                {emailError}
-              </ThemedText>
-            ) : null}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <ThemedText 
-              style={styles.label}
-              lightColor="#475569"
-              darkColor="#94a3b8"
-            >
-              Password
-            </ThemedText>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
-                  color: isDark ? '#f8fafc' : '#1e293b',
-                  borderColor: isDark ? '#334155' : '#e2e8f0' },
-                passwordError ? styles.inputError : null
-              ]}
-              placeholder="Enter your password"
-              placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setPasswordError('');
-              }}
-              secureTextEntry
-            />
-            {passwordError ? (
-              <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
-                {passwordError}
-              </ThemedText>
-            ) : null}
-          </View>
-
-          <TouchableOpacity 
-            style={styles.signupButton}
-            activeOpacity={0.8}
-            onPress={handleSignup}
-            disabled={isLoading}
-          >
-            <LinearGradient
-              colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#4f46e5', '#7c3aed']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.buttonGradient}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <ThemedText style={styles.buttonText}>
-                  Sign Up
-                </ThemedText>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <View style={styles.loginContainer}>
-            <ThemedText 
-              style={styles.loginText}
+              style={styles.subtitle}
               lightColor="#64748b"
               darkColor="#94a3b8"
             >
-              Already have an account?{' '}
+              Sign up to get started
             </ThemedText>
-            <Link href="../auth/login">
-              <ThemedText type="link">Log in</ThemedText>
-            </Link>
           </View>
-        </ThemedView>
-      </AnimatedView>
+
+          <ThemedView 
+            style={styles.form}
+            lightColor="#ffffff"
+            darkColor="#1e293b"
+          >
+            {formError ? (
+              <View style={styles.formErrorContainer}>
+                <ThemedText style={styles.formErrorText} lightColor="#ef4444" darkColor="#f87171">
+                  {formError}
+                </ThemedText>
+              </View>
+            ) : null}
+
+            <View style={styles.inputGroup}>
+              <ThemedText 
+                style={styles.label}
+                lightColor="#475569"
+                darkColor="#94a3b8"
+              >
+                Username
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+                    color: isDark ? '#f8fafc' : '#1e293b',
+                    borderColor: isDark ? '#334155' : '#e2e8f0' },
+                  usernameError ? styles.inputError : null
+                ]}
+                placeholder="Enter your username"
+                placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
+                value={username}
+                onChangeText={(text) => {
+                  setUsername(text);
+                  setUsernameError('');
+                }}
+                autoCapitalize="none"
+              />
+              {usernameError ? (
+                <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
+                  {usernameError}
+                </ThemedText>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <ThemedText 
+                style={styles.label}
+                lightColor="#475569"
+                darkColor="#94a3b8"
+              >
+                Email
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+                    color: isDark ? '#f8fafc' : '#1e293b',
+                    borderColor: isDark ? '#334155' : '#e2e8f0' },
+                  emailError ? styles.inputError : null
+                ]}
+                placeholder="Enter your email"
+                placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  setEmailError('');
+                }}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+              {emailError ? (
+                <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
+                  {emailError}
+                </ThemedText>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <ThemedText 
+                style={styles.label}
+                lightColor="#475569"
+                darkColor="#94a3b8"
+              >
+                Password
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+                    color: isDark ? '#f8fafc' : '#1e293b',
+                    borderColor: isDark ? '#334155' : '#e2e8f0' },
+                  passwordError ? styles.inputError : null
+                ]}
+                placeholder="Enter your password"
+                placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  setPasswordError('');
+                }}
+                secureTextEntry
+              />
+              {passwordError ? (
+                <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
+                  {passwordError}
+                </ThemedText>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <ThemedText 
+                style={styles.label}
+                lightColor="#475569"
+                darkColor="#94a3b8"
+              >
+                First Name
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+                    color: isDark ? '#f8fafc' : '#1e293b',
+                    borderColor: isDark ? '#334155' : '#e2e8f0' },
+                  firstNameError ? styles.inputError : null
+                ]}
+                placeholder="Enter your first name"
+                placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
+                value={firstName}
+                onChangeText={(text) => {
+                  setFirstName(text);
+                  setFirstNameError('');
+                }}
+                autoCapitalize="words"
+              />
+              {firstNameError ? (
+                <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
+                  {firstNameError}
+                </ThemedText>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <ThemedText 
+                style={styles.label}
+                lightColor="#475569"
+                darkColor="#94a3b8"
+              >
+                Last Name
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+                    color: isDark ? '#f8fafc' : '#1e293b',
+                    borderColor: isDark ? '#334155' : '#e2e8f0' },
+                  lastNameError ? styles.inputError : null
+                ]}
+                placeholder="Enter your last name"
+                placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
+                value={lastName}
+                onChangeText={(text) => {
+                  setLastName(text);
+                  setLastNameError('');
+                }}
+                autoCapitalize="words"
+              />
+              {lastNameError ? (
+                <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
+                  {lastNameError}
+                </ThemedText>
+              ) : null}
+            </View>
+
+            <TouchableOpacity 
+              style={styles.signupButton}
+              activeOpacity={0.8}
+              onPress={handleSignup}
+              disabled={isLoading}
+            >
+              <LinearGradient
+                colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#4f46e5', '#7c3aed']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#ffffff" />
+                ) : (
+                  <ThemedText style={styles.buttonText}>
+                    Sign Up
+                  </ThemedText>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <View style={styles.loginContainer}>
+              <ThemedText 
+                style={styles.loginText}
+                lightColor="#64748b"
+                darkColor="#94a3b8"
+              >
+                Already have an account?{' '}
+              </ThemedText>
+              <Link href="../auth/login">
+                <ThemedText type="link">Log in</ThemedText>
+              </Link>
+            </View>
+          </ThemedView>
+        </AnimatedView>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -406,5 +494,9 @@ const styles = StyleSheet.create({
   formErrorText: {
     fontSize: 14,
     textAlign: 'center',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
 }); 
