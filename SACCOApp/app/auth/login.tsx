@@ -18,6 +18,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [formError, setFormError] = useState('');
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function Login() {
     // Reset previous errors
     setEmailError('');
     setPasswordError('');
+    setFormError('');
 
     // Validate email/username
     if (!email.trim()) {
@@ -55,6 +57,7 @@ export default function Login() {
       }
 
       setIsLoading(true);
+      setFormError('');
       
       const response = await fetch(`${API_URL}/login/`, {
         method: 'POST',
@@ -70,18 +73,10 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 401) {
-          Alert.alert(
-            'Login Failed',
-            'Invalid username or password. Please try again.'
-          );
-        } else if (response.status === 404) {
-          Alert.alert(
-            'Login Failed',
-            'User not found. Please check your username.'
-          );
+        if (data.error) {
+          setFormError(data.error);
         } else {
-          throw new Error(data.message || 'Login failed');
+          setFormError('An unexpected error occurred. Please try again.');
         }
         return;
       }
@@ -92,10 +87,7 @@ export default function Login() {
       // Navigate to dashboard
       router.replace('/dashboard');
     } catch (error) {
-      Alert.alert(
-        'Login Error',
-        'An error occurred while trying to log in. Please try again later.'
-      );
+      setFormError('An error occurred while trying to log in. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -137,6 +129,13 @@ export default function Login() {
           lightColor="#ffffff"
           darkColor="#1e293b"
         >
+          {formError ? (
+            <View style={styles.formErrorContainer}>
+              <ThemedText style={styles.formErrorText} lightColor="#ef4444" darkColor="#f87171">
+                {formError}
+              </ThemedText>
+            </View>
+          ) : null}
           <View style={styles.inputGroup}>
             <ThemedText 
               style={styles.label}
@@ -335,5 +334,17 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     marginTop: 4,
+  },
+  formErrorContainer: {
+    marginBottom: 16,
+    padding: 12,
+    backgroundColor: '#fef2f2',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fee2e2',
+  },
+  formErrorText: {
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
