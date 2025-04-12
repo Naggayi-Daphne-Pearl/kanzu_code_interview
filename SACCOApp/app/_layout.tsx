@@ -5,6 +5,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+// Import the global.css file in the index.js file:
+import '../global.css';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
