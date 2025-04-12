@@ -1,20 +1,60 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Link, useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
+
+const API_URL = 'http://127.0.0.1:8000/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const router = useRouter();
+
+  const handleLogin = async () => {
+    try {
+      setIsLoading(true);
+      
+      const response = await fetch(`${API_URL}/login/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: email, // Using email as username
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Store the token
+      await AsyncStorage.setItem('authToken', data.token);
+      
+      // Navigate to dashboard
+      router.replace('/dashboard');
+    } catch (error) {
+      Alert.alert(
+        'Login Error',
+        error instanceof Error ? error.message : 'Failed to login. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <ThemedView style={styles.container} lightColor="#f8fafc" darkColor="#0f172a">
@@ -106,7 +146,8 @@ export default function Login() {
           <TouchableOpacity 
             style={styles.loginButton}
             activeOpacity={0.8}
-            onPress={() => router.replace('/dashboard')}
+            onPress={handleLogin}
+            disabled={isLoading}
           >
             <LinearGradient
               colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#4f46e5', '#7c3aed']}
@@ -114,9 +155,13 @@ export default function Login() {
               end={{ x: 1, y: 1 }}
               style={styles.buttonGradient}
             >
-              <ThemedText style={styles.buttonText}>
-                Login
-              </ThemedText>
+              {isLoading ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <ThemedText style={styles.buttonText}>
+                  Login
+                </ThemedText>
+              )}
             </LinearGradient>
           </TouchableOpacity>
 
