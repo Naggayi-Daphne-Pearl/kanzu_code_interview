@@ -16,12 +16,44 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const router = useRouter();
 
+  const validateInputs = () => {
+    let isValid = true;
+    
+    // Reset previous errors
+    setEmailError('');
+    setPasswordError('');
+
+    // Validate email/username
+    if (!email.trim()) {
+      setEmailError('Username is required');
+      isValid = false;
+    }
+
+    // Validate password
+    if (!password) {
+      setPasswordError('Password is required');
+      isValid = false;
+    } else if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
   const handleLogin = async () => {
     try {
+      // First validate inputs
+      if (!validateInputs()) {
+        return;
+      }
+
       setIsLoading(true);
       
       const response = await fetch(`${API_URL}/login/`, {
@@ -30,7 +62,7 @@ export default function Login() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: email, // Using email as username
+          username: email.trim(),
           password,
         }),
       });
@@ -38,7 +70,20 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        if (response.status === 401) {
+          Alert.alert(
+            'Login Failed',
+            'Invalid username or password. Please try again.'
+          );
+        } else if (response.status === 404) {
+          Alert.alert(
+            'Login Failed',
+            'User not found. Please check your username.'
+          );
+        } else {
+          throw new Error(data.message || 'Login failed');
+        }
+        return;
       }
 
       // Store the token
@@ -49,7 +94,7 @@ export default function Login() {
     } catch (error) {
       Alert.alert(
         'Login Error',
-        error instanceof Error ? error.message : 'Failed to login. Please try again.'
+        'An error occurred while trying to log in. Please try again later.'
       );
     } finally {
       setIsLoading(false);
@@ -98,22 +143,30 @@ export default function Login() {
               lightColor="#475569"
               darkColor="#94a3b8"
             >
-              Email
+              Username
             </ThemedText>
             <TextInput
               style={[
                 styles.input,
                 { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
                   color: isDark ? '#f8fafc' : '#1e293b',
-                  borderColor: isDark ? '#334155' : '#e2e8f0' }
+                  borderColor: isDark ? '#334155' : '#e2e8f0' },
+                emailError ? styles.inputError : null
               ]}
-              placeholder="Enter your email"
+              placeholder="Enter your username"
               placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
               value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
+              onChangeText={(text) => {
+                setEmail(text);
+                setEmailError('');
+              }}
               autoCapitalize="none"
             />
+            {emailError ? (
+              <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
+                {emailError}
+              </ThemedText>
+            ) : null}
           </View>
 
           <View style={styles.inputGroup}>
@@ -129,14 +182,23 @@ export default function Login() {
                 styles.input,
                 { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
                   color: isDark ? '#f8fafc' : '#1e293b',
-                  borderColor: isDark ? '#334155' : '#e2e8f0' }
+                  borderColor: isDark ? '#334155' : '#e2e8f0' },
+                passwordError ? styles.inputError : null
               ]}
               placeholder="Enter your password"
               placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+                setPasswordError('');
+              }}
               secureTextEntry
             />
+            {passwordError ? (
+              <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
+                {passwordError}
+              </ThemedText>
+            ) : null}
           </View>
 
           <Link href="../forgot-password" style={styles.forgotPassword}>
@@ -265,5 +327,13 @@ const styles = StyleSheet.create({
   },
   signupText: {
     color: '#64748b',
+  },
+  inputError: {
+    borderColor: '#ef4444',
+    borderWidth: 1,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: 4,
   },
 });
