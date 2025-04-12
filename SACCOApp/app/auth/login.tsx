@@ -5,15 +5,18 @@ import { ThemedText } from '@/components/ThemedText';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Link } from 'expo-router';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container} lightColor="#f8fafc" darkColor="#0f172a">
       <LinearGradient
         colors={['#4f46e5', '#7c3aed']}
         start={{ x: 0, y: 0 }}
@@ -26,21 +29,45 @@ export default function Login() {
         style={styles.formContainer}
       >
         <View style={styles.header}>
-          <ThemedText type="title" style={styles.title}>
+          <ThemedText 
+            type="title" 
+            style={styles.title}
+            lightColor="#1e293b"
+            darkColor="#f8fafc"
+          >
             Welcome Back 👋
           </ThemedText>
-          <ThemedText style={styles.subtitle}>
+          <ThemedText 
+            style={styles.subtitle}
+            lightColor="#64748b"
+            darkColor="#94a3b8"
+          >
             Sign in to continue to your account
           </ThemedText>
         </View>
 
-        <View style={styles.form}>
+        <ThemedView 
+          style={styles.form}
+          lightColor="#ffffff"
+          darkColor="#1e293b"
+        >
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.label}>Email</ThemedText>
+            <ThemedText 
+              style={styles.label}
+              lightColor="#475569"
+              darkColor="#94a3b8"
+            >
+              Email
+            </ThemedText>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+                  color: isDark ? '#f8fafc' : '#1e293b',
+                  borderColor: isDark ? '#334155' : '#e2e8f0' }
+              ]}
               placeholder="Enter your email"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -49,11 +76,22 @@ export default function Login() {
           </View>
 
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.label}>Password</ThemedText>
+            <ThemedText 
+              style={styles.label}
+              lightColor="#475569"
+              darkColor="#94a3b8"
+            >
+              Password
+            </ThemedText>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+                  color: isDark ? '#f8fafc' : '#1e293b',
+                  borderColor: isDark ? '#334155' : '#e2e8f0' }
+              ]}
               placeholder="Enter your password"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={isDark ? '#64748b' : '#94a3b8'}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -69,7 +107,7 @@ export default function Login() {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#4f46e5', '#7c3aed']}
+              colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#4f46e5', '#7c3aed']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.buttonGradient}
@@ -81,23 +119,26 @@ export default function Login() {
           </TouchableOpacity>
 
           <View style={styles.signupContainer}>
-            <ThemedText style={styles.signupText}>
+            <ThemedText 
+              style={styles.signupText}
+              lightColor="#64748b"
+              darkColor="#94a3b8"
+            >
               Don't have an account?{' '}
             </ThemedText>
             <Link href="../signup">
               <ThemedText type="link">Sign up</ThemedText>
             </Link>
           </View>
-        </View>
+        </ThemedView>
       </AnimatedView>
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   backgroundGradient: {
     position: 'absolute',
@@ -127,11 +168,9 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#64748b',
     textAlign: 'center',
   },
   form: {
-    backgroundColor: '#ffffff',
     borderRadius: 24,
     padding: 32,
     shadowColor: '#000',
@@ -147,14 +186,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
-    color: '#475569',
   },
   input: {
-    backgroundColor: '#f8fafc',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: '#1e293b',
+    borderWidth: 1,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
