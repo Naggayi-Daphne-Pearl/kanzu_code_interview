@@ -4,7 +4,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -14,6 +14,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const router = useRouter();
 
   return (
     <ThemedView style={styles.container} lightColor="#f8fafc" darkColor="#0f172a">
@@ -105,6 +106,7 @@ export default function Login() {
           <TouchableOpacity 
             style={styles.loginButton}
             activeOpacity={0.8}
+            onPress={() => router.replace('/dashboard')}
           >
             <LinearGradient
               colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#4f46e5', '#7c3aed']}
@@ -118,7 +120,7 @@ export default function Login() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <View style={styles.signupContainer}>
+          {/* <View style={styles.signupContainer}>
             <ThemedText 
               style={styles.signupText}
               lightColor="#64748b"
@@ -129,7 +131,7 @@ export default function Login() {
             <Link href="../signup">
               <ThemedText type="link">Sign up</ThemedText>
             </Link>
-          </View>
+          </View> */}
         </ThemedView>
       </AnimatedView>
     </ThemedView>
