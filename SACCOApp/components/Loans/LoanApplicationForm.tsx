@@ -10,6 +10,7 @@ interface LoanApplication {
   amount: string;
   period: number;
   reason: string;
+  loan_type?: string;
 }
 
 interface LoanApplicationFormProps {
@@ -28,6 +29,13 @@ export function LoanApplicationForm({ formData, setFormData, onSubmit }: LoanApp
     { label: '12 months', value: 12 },
     { label: '18 months', value: 18 },
     { label: '24 months', value: 24 },
+  ];
+
+  const LOAN_TYPES = [
+    { label: 'Personal Loan', value: 'personal' },
+    { label: 'Business Loan', value: 'business' },
+    { label: 'Education Loan', value: 'education' },
+    { label: 'Emergency Loan', value: 'emergency' },
   ];
 
   const MIN_AMOUNT = 500000; // UGX 500,000
@@ -99,6 +107,40 @@ export function LoanApplicationForm({ formData, setFormData, onSubmit }: LoanApp
       lightColor="#ffffff"
       darkColor="#1e293b"
     >
+      {/* Loan Type Selection */}
+      <View style={styles.inputGroup}>
+        <ThemedText 
+          style={styles.label}
+          lightColor="#475569"
+          darkColor="#94a3b8"
+        >
+          Loan Type
+        </ThemedText>
+        <View style={[
+          styles.pickerContainer,
+          { backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+            borderColor: isDark ? '#334155' : '#e2e8f0' }
+        ]}>
+          <Picker
+            selectedValue={formData.loan_type || 'personal'}
+            onValueChange={(value) => setFormData({ ...formData, loan_type: value })}
+            style={[
+              styles.picker,
+              { color: isDark ? '#f8fafc' : '#1e293b' }
+            ]}
+          >
+            {LOAN_TYPES.map((type) => (
+              <Picker.Item 
+                key={type.value} 
+                label={type.label} 
+                value={type.value}
+                color={isDark ? '#f8fafc' : '#1e293b'}
+              />
+            ))}
+          </Picker>
+        </View>
+      </View>
+
       {/* Amount Input */}
       <View style={styles.inputGroup}>
         <ThemedText 

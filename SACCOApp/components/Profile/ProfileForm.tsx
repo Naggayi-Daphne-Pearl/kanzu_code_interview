@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,6 +22,26 @@ export function ProfileForm({ initialData, onPasswordChange }: ProfileFormProps)
   const isDark = colorScheme === 'dark';
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileData, string>>>({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Fetch user data
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/userprofiles/my_profile/', {
+          headers: {
+            Authorization: 'Bearer your_access_token',
+          },
+        });
+        const data = await response.json();
+        setFormData(data);
+      } catch (error) {
+        Alert.alert('Error', 'Failed to fetch user data');
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const validateField = (field: keyof ProfileData, value: string) => {
     const newErrors = { ...errors };
@@ -74,15 +94,34 @@ export function ProfileForm({ initialData, onPasswordChange }: ProfileFormProps)
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
-    // Validate all fields
-    const isValid = Object.keys(formData).every(field => 
-      validateField(field as keyof ProfileData, formData[field as keyof ProfileData])
-    );
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      // Validate all fields
+      const isValid = Object.keys(formData).every(field => 
+        validateField(field as keyof ProfileData, formData[field as keyof ProfileData])
+      );
 
-    if (isValid) {
-      // TODO: Implement API call to update profile
-      console.log('Profile updated:', formData);
+      if (isValid) {
+        const response = await fetch('http://127.0.0.1:8000/api/userprofiles/update_profile/', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer your_access_token',
+          },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          Alert.alert('Success', 'Profile updated successfully');
+        } else {
+          Alert.alert('Error', 'Failed to update profile');
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while updating profile');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -241,6 +280,7 @@ export function ProfileForm({ initialData, onPasswordChange }: ProfileFormProps)
       <TouchableOpacity 
         style={styles.saveButton}
         onPress={handleSubmit}
+        disabled={loading}
       >
         <LinearGradient
           colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#4f46e5', '#7c3aed']}

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -24,37 +24,39 @@ interface Loan {
   requestDate?: string;
 }
 
-// Mock data - replace with actual API data
-const MOCK_LOANS: Loan[] = [
-  {
-    id: '1',
-    amount: 5000000,
-    status: 'active',
-    startDate: '2024-01-15',
-    endDate: '2024-07-15',
-    balanceLeft: 3500000,
-    nextPayment: '2024-03-15',
-    nextPaymentAmount: 850000,
-  },
-  {
-    id: '2',
-    amount: 2000000,
-    status: 'pending',
-    requestDate: '2024-03-01',
-  },
-  {
-    id: '3',
-    amount: 3000000,
-    status: 'completed',
-    startDate: '2023-06-15',
-    endDate: '2023-12-15',
-  },
-];
-
 export default function Loans() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+  const [loans, setLoans] = useState<Loan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchLoans();
+  }, []);
+
+  const fetchLoans = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('http://localhost:8000/api/loan-applications/', {
+       
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error fetching loans: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setLoans(data);
+    } catch (err) {
+      console.error('Failed to fetch loans:', err);
+      setError('Failed to load your loans. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: LoanStatus) => {
     switch (status) {
@@ -128,118 +130,168 @@ export default function Loans() {
             </TouchableOpacity>
           </AnimatedView>
 
-          {/* Loans List */}
-          <AnimatedView entering={FadeInUp.duration(1000).delay(300)} style={styles.loansList}>
-            {MOCK_LOANS.map((loan) => (
-              <TouchableOpacity
-                key={loan.id}
-                onPress={() => setSelectedLoan(loan)}
-              >
-                <ThemedView 
-                  style={styles.loanCard}
-                  lightColor="#ffffff"
-                  darkColor="#1e293b"
-                >
-                  <View style={styles.loanCardHeader}>
-                    <ThemedText 
-                      type="subtitle" 
-                      style={styles.loanAmount}
-                      lightColor="#1e293b"
-                      darkColor="#f8fafc"
-                    >
-                      {formatAmount(loan.amount)}
-                    </ThemedText>
-                    <View style={[
-                      styles.statusBadge,
-                      { backgroundColor: getStatusColor(loan.status).bg }
-                    ]}>
-                      <ThemedText style={[
-                        styles.statusText,
-                        { color: getStatusColor(loan.status).text }
-                      ]}>
-                        {loan.status.charAt(0).toUpperCase() + loan.status.slice(1)}
-                      </ThemedText>
-                    </View>
-                  </View>
+          {/* Loading State */}
+          {loading && (
+            <AnimatedView entering={FadeInUp.duration(1000)} style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={isDark ? '#8b5cf6' : '#4f46e5'} />
+              <ThemedText style={styles.loadingText}>Loading your loans...</ThemedText>
+            </AnimatedView>
+          )}
 
-                  <View style={styles.loanCardContent}>
-                    {loan.status === 'active' && (
-                      <>
-                        <View style={styles.loanDetail}>
-                          <ThemedText 
-                            style={styles.detailLabel}
-                            lightColor="#64748b"
-                            darkColor="#94a3b8"
-                          >
-                            Balance Left
-                          </ThemedText>
-                          <ThemedText 
-                            style={styles.detailValue}
-                            lightColor="#1e293b"
-                            darkColor="#f8fafc"
-                          >
-                            {loan.balanceLeft ? formatAmount(loan.balanceLeft) : ''}
-                          </ThemedText>
-                        </View>
-                        <View style={styles.loanDetail}>
-                          <ThemedText 
-                            style={styles.detailLabel}
-                            lightColor="#64748b"
-                            darkColor="#94a3b8"
-                          >
-                            Next Payment
-                          </ThemedText>
-                          <ThemedText 
-                            style={styles.detailValue}
-                            lightColor="#1e293b"
-                            darkColor="#f8fafc"
-                          >
-                            {formatDate(loan.nextPayment)}
-                          </ThemedText>
-                        </View>
-                      </>
-                    )}
-                    {loan.status === 'pending' && (
-                      <View style={styles.loanDetail}>
-                        <ThemedText 
-                          style={styles.detailLabel}
-                          lightColor="#64748b"
-                          darkColor="#94a3b8"
-                        >
-                          Requested On
-                        </ThemedText>
-                        <ThemedText 
-                          style={styles.detailValue}
-                          lightColor="#1e293b"
-                          darkColor="#f8fafc"
-                        >
-                          {formatDate(loan.requestDate)}
-                        </ThemedText>
-                      </View>
-                    )}
-                    {loan.status === 'completed' && (
-                      <View style={styles.loanDetail}>
-                        <ThemedText 
-                          style={styles.detailLabel}
-                          lightColor="#64748b"
-                          darkColor="#94a3b8"
-                        >
-                          Completed On
-                        </ThemedText>
-                        <ThemedText 
-                          style={styles.detailValue}
-                          lightColor="#1e293b"
-                          darkColor="#f8fafc"
-                        >
-                          {formatDate(loan.endDate)}
-                        </ThemedText>
-                      </View>
-                    )}
-                  </View>
-                </ThemedView>
+          {/* Error State */}
+          {error && !loading && (
+            <AnimatedView entering={FadeInUp.duration(1000)} style={styles.errorContainer}>
+              <ThemedText style={styles.errorText} lightColor="#ef4444" darkColor="#f87171">
+                {error}
+              </ThemedText>
+              <TouchableOpacity 
+                style={styles.retryButton}
+                onPress={fetchLoans}
+              >
+                <ThemedText style={styles.retryText} lightColor="#4f46e5" darkColor="#818cf8">
+                  Retry
+                </ThemedText>
               </TouchableOpacity>
-            ))}
-          </AnimatedView>
+            </AnimatedView>
+          )}
+
+          {/* Loans List */}
+          {!loading && !error && loans.length === 0 && (
+            <AnimatedView entering={FadeInUp.duration(1000)} style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>
+                You don't have any loans yet
+              </ThemedText>
+              <TouchableOpacity 
+                style={styles.applyButtonLarge}
+                onPress={() => router.push('loans/apply' as any)}
+              >
+                <LinearGradient
+                  colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#4f46e5', '#7c3aed']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.buttonGradient}
+                >
+                  <ThemedText style={styles.buttonText}>
+                    Apply for your first loan
+                  </ThemedText>
+                </LinearGradient>
+              </TouchableOpacity>
+            </AnimatedView>
+          )}
+
+          {!loading && !error && loans.length > 0 && (
+            <AnimatedView entering={FadeInUp.duration(1000).delay(300)} style={styles.loansList}>
+              {loans.map((loan) => (
+                <TouchableOpacity
+                  key={loan.id}
+                  onPress={() => setSelectedLoan(loan)}
+                >
+                  <ThemedView 
+                    style={styles.loanCard}
+                    lightColor="#ffffff"
+                    darkColor="#1e293b"
+                  >
+                    <View style={styles.loanCardHeader}>
+                      <ThemedText 
+                        type="subtitle" 
+                        style={styles.loanAmount}
+                        lightColor="#1e293b"
+                        darkColor="#f8fafc"
+                      >
+                        {formatAmount(loan.amount)}
+                      </ThemedText>
+                      <View style={[
+                        styles.statusBadge,
+                        { backgroundColor: getStatusColor(loan.status).bg }
+                      ]}>
+                        <ThemedText style={[
+                          styles.statusText,
+                          { color: getStatusColor(loan.status).text }
+                        ]}>
+                          {loan.status.charAt(0).toUpperCase() + loan.status.slice(1)}
+                        </ThemedText>
+                      </View>
+                    </View>
+
+                    <View style={styles.loanCardContent}>
+                      {loan.status === 'active' && (
+                        <>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Balance Left
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {loan.balanceLeft ? formatAmount(loan.balanceLeft) : ''}
+                            </ThemedText>
+                          </View>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Next Payment
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {formatDate(loan.nextPayment)}
+                            </ThemedText>
+                          </View>
+                        </>
+                      )}
+                      {loan.status === 'pending' && (
+                        <View style={styles.loanDetail}>
+                          <ThemedText 
+                            style={styles.detailLabel}
+                            lightColor="#64748b"
+                            darkColor="#94a3b8"
+                          >
+                            Requested On
+                          </ThemedText>
+                          <ThemedText 
+                            style={styles.detailValue}
+                            lightColor="#1e293b"
+                            darkColor="#f8fafc"
+                          >
+                            {formatDate(loan.requestDate)}
+                          </ThemedText>
+                        </View>
+                      )}
+                      {loan.status === 'completed' && (
+                        <View style={styles.loanDetail}>
+                          <ThemedText 
+                            style={styles.detailLabel}
+                            lightColor="#64748b"
+                            darkColor="#94a3b8"
+                          >
+                            Completed On
+                          </ThemedText>
+                          <ThemedText 
+                            style={styles.detailValue}
+                            lightColor="#1e293b"
+                            darkColor="#f8fafc"
+                          >
+                            {formatDate(loan.endDate)}
+                          </ThemedText>
+                        </View>
+                      )}
+                    </View>
+                  </ThemedView>
+                </TouchableOpacity>
+              ))}
+            </AnimatedView>
+          )}
         </View>
 
         {/* Loan Details Modal */}
@@ -355,5 +407,48 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  retryText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  applyButtonLarge: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    width: '70%',
+    maxWidth: 300,
   },
 }); 

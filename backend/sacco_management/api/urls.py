@@ -11,8 +11,8 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r'userprofiles', UserProfileViewSet)
-router.register(r'loan-applications', LoanApplicationViewSet)
+router.register(r'userprofiles', UserProfileViewSet, basename='userprofile')
+router.register(r'loan-applications', LoanApplicationViewSet, basename='loan-application')
 router.register(r'transactions', TransactionViewSet, basename='transaction')
 
 urlpatterns = [

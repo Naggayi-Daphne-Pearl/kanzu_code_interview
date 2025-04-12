@@ -88,8 +88,8 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
 class DashboardSerializer(serializers.Serializer):
-    total_loans = serializers.IntegerField()
-    active_loans = serializers.IntegerField()
-    total_loan_amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    user_info = serializers.DictField()
+    loan_summary = serializers.DictField()
     recent_transactions = TransactionSerializer(many=True)
     active_loans_details = LoanApplicationSerializer(many=True)
+    pending_applications = LoanApplicationSerializer(many=True)

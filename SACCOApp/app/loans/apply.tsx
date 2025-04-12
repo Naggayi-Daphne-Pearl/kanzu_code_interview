@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Modal, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Modal, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,23 +7,28 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { router } from 'expo-router';
 import { LoanApplicationForm } from '../../components/Loans/LoanApplicationForm';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
+const API_URL = 'http://127.0.0.1:8000/api';
 
 interface LoanApplication {
   amount: string;
   period: number;
   reason: string;
+  loan_type?: string;
 }
 
 export default function LoanApplicationPage() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<LoanApplication>({
     amount: '',
     period: 6,
     reason: '',
+    loan_type: 'personal',
   });
 
   // Interest rate of 15% per annum
@@ -53,10 +58,67 @@ export default function LoanApplicationPage() {
     setShowConfirmation(true);
   };
 
-  const confirmSubmit = () => {
-    // TODO: Implement API call to submit loan application
-    setShowConfirmation(false);
-    router.push('/loans');
+  const confirmSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      // Get auth token from storage
+      const token = await AsyncStorage.getItem('authToken');
+      
+      if (!token) {
+        Alert.alert('Error', 'You need to be logged in to apply for a loan.');
+        router.push('/dashboard');
+        return;
+      }
+      
+      // Parse the amount to a number
+      const amountValue = parseFloat(formData.amount.replace(/[^0-9.]/g, ''));
+      
+      // Prepare request body
+      const requestBody = {
+        loan_type: formData.loan_type,
+        amount: amountValue,
+        purpose: formData.reason,
+        repayment_period: formData.period,
+        interest_rate: ANNUAL_INTEREST_RATE * 100 // Convert to percentage
+      };
+      
+      // Make API request
+      const response = await fetch(`${API_URL}/loan-applications/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (data.error) {
+          throw new Error(data.error);
+        } else {
+          throw new Error('Failed to submit loan application');
+        }
+      }
+      
+      // Show success message
+      Alert.alert(
+        'Success',
+        'Your loan application has been submitted successfully!',
+        [{ text: 'OK', onPress: () => router.push('/dashboard') }]
+      );
+      
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to submit loan application'
+      );
+    } finally {
+      setIsSubmitting(false);
+      setShowConfirmation(false);
+    }
   };
 
   const formatAmount = (amount: number) => {
@@ -194,6 +256,25 @@ export default function LoanApplicationPage() {
                     lightColor="#64748b"
                     darkColor="#94a3b8"
                   >
+                    Loan Type
+                  </ThemedText>
+                  <ThemedText 
+                    style={styles.modalValue}
+                    lightColor="#1e293b"
+                    darkColor="#f8fafc"
+                  >
+                    {formData.loan_type === 'personal' ? 'Personal Loan' : 
+                     formData.loan_type === 'business' ? 'Business Loan' : 
+                     formData.loan_type === 'education' ? 'Education Loan' : 
+                     formData.loan_type === 'emergency' ? 'Emergency Loan' : 'Personal Loan'}
+                  </ThemedText>
+                </View>
+                <View style={styles.modalRow}>
+                  <ThemedText 
+                    style={styles.modalLabel}
+                    lightColor="#64748b"
+                    darkColor="#94a3b8"
+                  >
                     Loan Amount
                   </ThemedText>
                   <ThemedText 
@@ -241,6 +322,7 @@ export default function LoanApplicationPage() {
                 <TouchableOpacity 
                   style={[styles.modalButton, styles.cancelButton]}
                   onPress={() => setShowConfirmation(false)}
+                  disabled={isSubmitting}
                 >
                   <ThemedText style={styles.modalButtonText}>
                     Cancel
@@ -249,6 +331,7 @@ export default function LoanApplicationPage() {
                 <TouchableOpacity 
                   style={styles.modalButton}
                   onPress={confirmSubmit}
+                  disabled={isSubmitting}
                 >
                   <LinearGradient
                     colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#4f46e5', '#7c3aed']}
@@ -256,9 +339,13 @@ export default function LoanApplicationPage() {
                     end={{ x: 1, y: 1 }}
                     style={styles.modalButtonGradient}
                   >
-                    <ThemedText style={styles.modalButtonText}>
-                      Confirm
-                    </ThemedText>
+                    {isSubmitting ? (
+                      <ActivityIndicator color="#ffffff" />
+                    ) : (
+                      <ThemedText style={styles.modalButtonText}>
+                        Confirm
+                      </ThemedText>
+                    )}
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
