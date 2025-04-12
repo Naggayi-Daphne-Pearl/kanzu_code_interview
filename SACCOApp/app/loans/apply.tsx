@@ -88,6 +88,7 @@ export default function LoanApplicationPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -106,7 +107,7 @@ export default function LoanApplicationPage() {
       Alert.alert(
         'Success',
         'Your loan application has been submitted successfully!',
-        [{ text: 'OK', onPress: () => router.push('/dashboard') }]
+        [{ text: 'OK', onPress: () => router.replace('/dashboard') }]
       );
       
     } catch (error) {

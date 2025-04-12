@@ -333,22 +333,22 @@ export default function Loans() {
                               {loan.repayment_period} months
                             </ThemedText>
                           </View>
-                          <View style={styles.loanDetail}>
-                            <ThemedText 
-                              style={styles.detailLabel}
-                              lightColor="#64748b"
-                              darkColor="#94a3b8"
-                            >
-                              Requested On
-                            </ThemedText>
-                            <ThemedText 
-                              style={styles.detailValue}
-                              lightColor="#1e293b"
-                              darkColor="#f8fafc"
-                            >
+                        <View style={styles.loanDetail}>
+                          <ThemedText 
+                            style={styles.detailLabel}
+                            lightColor="#64748b"
+                            darkColor="#94a3b8"
+                          >
+                            Requested On
+                          </ThemedText>
+                          <ThemedText 
+                            style={styles.detailValue}
+                            lightColor="#1e293b"
+                            darkColor="#f8fafc"
+                          >
                               {formatDate(loan.created_at)}
-                            </ThemedText>
-                          </View>
+                          </ThemedText>
+                        </View>
                         </>
                       )}
                       {loan.status === 'completed' && (
@@ -385,22 +385,22 @@ export default function Loans() {
                               {loan.repayment_period} months
                             </ThemedText>
                           </View>
-                          <View style={styles.loanDetail}>
-                            <ThemedText 
-                              style={styles.detailLabel}
-                              lightColor="#64748b"
-                              darkColor="#94a3b8"
-                            >
-                              Completed On
-                            </ThemedText>
-                            <ThemedText 
-                              style={styles.detailValue}
-                              lightColor="#1e293b"
-                              darkColor="#f8fafc"
-                            >
+                        <View style={styles.loanDetail}>
+                          <ThemedText 
+                            style={styles.detailLabel}
+                            lightColor="#64748b"
+                            darkColor="#94a3b8"
+                          >
+                            Completed On
+                          </ThemedText>
+                          <ThemedText 
+                            style={styles.detailValue}
+                            lightColor="#1e293b"
+                            darkColor="#f8fafc"
+                          >
                               {formatDate(loan.completed_at)}
-                            </ThemedText>
-                          </View>
+                          </ThemedText>
+                        </View>
                         </>
                       )}
                     </View>
