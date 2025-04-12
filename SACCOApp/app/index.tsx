@@ -182,7 +182,7 @@ export default function Index() {
               </View>
             </LinearGradient>
           </AnimatedView>
-        </View>
+    </View>
       </ThemedView>
     </ScrollView>
   );
