@@ -87,7 +87,6 @@ export default function LoanApplicationPage() {
       const response = await fetch(`${API_URL}/loan-applications/`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),

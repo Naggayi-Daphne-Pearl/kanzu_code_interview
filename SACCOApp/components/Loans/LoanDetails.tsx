@@ -9,14 +9,18 @@ type LoanStatus = 'active' | 'pending' | 'completed';
 
 interface Loan {
   id: string;
+  loan_type: string;
   amount: number;
+  purpose: string;
+  repayment_period: number;
+  interest_rate: number;
   status: LoanStatus;
-  startDate?: string;
-  endDate?: string;
-  balanceLeft?: number;
-  nextPayment?: string;
-  nextPaymentAmount?: number;
-  requestDate?: string;
+  created_at: string;
+  approved_at?: string;
+  completed_at?: string;
+  balance_remaining?: number;
+  next_payment_date?: string;
+  next_payment_amount?: number;
 }
 
 interface Payment {
@@ -138,7 +142,71 @@ export function LoanDetails({ loan, onClose }: LoanDetailsProps) {
                   {formatAmount(loan.amount)}
                 </ThemedText>
               </View>
-              {loan.status === 'active' && loan.balanceLeft !== undefined && (
+              <View style={styles.summaryRow}>
+                <ThemedText 
+                  style={styles.summaryLabel}
+                  lightColor="#64748b"
+                  darkColor="#94a3b8"
+                >
+                  Loan Type
+                </ThemedText>
+                <ThemedText 
+                  style={styles.summaryValue}
+                  lightColor="#1e293b"
+                  darkColor="#f8fafc"
+                >
+                  {loan.loan_type.charAt(0).toUpperCase() + loan.loan_type.slice(1)} Loan
+                </ThemedText>
+              </View>
+              <View style={styles.summaryRow}>
+                <ThemedText 
+                  style={styles.summaryLabel}
+                  lightColor="#64748b"
+                  darkColor="#94a3b8"
+                >
+                  Purpose
+                </ThemedText>
+                <ThemedText 
+                  style={styles.summaryValue}
+                  lightColor="#1e293b"
+                  darkColor="#f8fafc"
+                >
+                  {loan.purpose}
+                </ThemedText>
+              </View>
+              <View style={styles.summaryRow}>
+                <ThemedText 
+                  style={styles.summaryLabel}
+                  lightColor="#64748b"
+                  darkColor="#94a3b8"
+                >
+                  Repayment Period
+                </ThemedText>
+                <ThemedText 
+                  style={styles.summaryValue}
+                  lightColor="#1e293b"
+                  darkColor="#f8fafc"
+                >
+                  {loan.repayment_period} months
+                </ThemedText>
+              </View>
+              <View style={styles.summaryRow}>
+                <ThemedText 
+                  style={styles.summaryLabel}
+                  lightColor="#64748b"
+                  darkColor="#94a3b8"
+                >
+                  Interest Rate
+                </ThemedText>
+                <ThemedText 
+                  style={styles.summaryValue}
+                  lightColor="#1e293b"
+                  darkColor="#f8fafc"
+                >
+                  {loan.interest_rate}%
+                </ThemedText>
+              </View>
+              {loan.status === 'active' && loan.balance_remaining !== undefined && (
                 <>
                   <View style={styles.summaryRow}>
                     <ThemedText 
@@ -153,10 +221,10 @@ export function LoanDetails({ loan, onClose }: LoanDetailsProps) {
                       lightColor="#1e293b"
                       darkColor="#f8fafc"
                     >
-                      {formatAmount(loan.balanceLeft)}
+                      {formatAmount(loan.balance_remaining)}
                     </ThemedText>
                   </View>
-                  {loan.nextPaymentAmount && (
+                  {loan.next_payment_amount && (
                     <View style={styles.summaryRow}>
                       <ThemedText 
                         style={styles.summaryLabel}
@@ -170,11 +238,11 @@ export function LoanDetails({ loan, onClose }: LoanDetailsProps) {
                         lightColor="#1e293b"
                         darkColor="#f8fafc"
                       >
-                        {formatAmount(loan.nextPaymentAmount)}
+                        {formatAmount(loan.next_payment_amount)}
                       </ThemedText>
                     </View>
                   )}
-                  {loan.nextPayment && (
+                  {loan.next_payment_date && (
                     <View style={styles.summaryRow}>
                       <ThemedText 
                         style={styles.summaryLabel}
@@ -188,13 +256,13 @@ export function LoanDetails({ loan, onClose }: LoanDetailsProps) {
                         lightColor="#1e293b"
                         darkColor="#f8fafc"
                       >
-                        {formatDate(loan.nextPayment)}
+                        {formatDate(loan.next_payment_date)}
                       </ThemedText>
                     </View>
                   )}
                 </>
               )}
-              {loan.startDate && (
+              {loan.created_at && (
                 <View style={styles.summaryRow}>
                   <ThemedText 
                     style={styles.summaryLabel}
@@ -208,11 +276,11 @@ export function LoanDetails({ loan, onClose }: LoanDetailsProps) {
                     lightColor="#1e293b"
                     darkColor="#f8fafc"
                   >
-                    {formatDate(loan.startDate)}
+                    {formatDate(loan.created_at)}
                   </ThemedText>
                 </View>
               )}
-              {loan.endDate && (
+              {loan.completed_at && (
                 <View style={styles.summaryRow}>
                   <ThemedText 
                     style={styles.summaryLabel}
@@ -226,7 +294,7 @@ export function LoanDetails({ loan, onClose }: LoanDetailsProps) {
                     lightColor="#1e293b"
                     darkColor="#f8fafc"
                   >
-                    {formatDate(loan.endDate)}
+                    {formatDate(loan.completed_at)}
                   </ThemedText>
                 </View>
               )}

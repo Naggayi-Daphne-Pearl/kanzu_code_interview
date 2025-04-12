@@ -7,6 +7,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { router } from 'expo-router';
 import { LoanDetails } from '../../components/Loans/LoanDetails';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
@@ -14,14 +15,18 @@ type LoanStatus = 'active' | 'pending' | 'completed';
 
 interface Loan {
   id: string;
+  loan_type: string;
   amount: number;
+  purpose: string;
+  repayment_period: number;
+  interest_rate: number;
   status: LoanStatus;
-  startDate?: string;
-  endDate?: string;
-  balanceLeft?: number;
-  nextPayment?: string;
-  nextPaymentAmount?: number;
-  requestDate?: string;
+  created_at: string;
+  approved_at?: string;
+  completed_at?: string;
+  balance_remaining?: number;
+  next_payment_date?: string;
+  next_payment_amount?: number;
 }
 
 export default function Loans() {
@@ -40,8 +45,20 @@ export default function Loans() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:8000/api/loan-applications/', {
-       
+      // Get auth token from storage
+      const token = await AsyncStorage.getItem('authToken');
+      
+      if (!token) {
+        setError('You need to be logged in to view your loans');
+        router.push('/auth/login');
+        return;
+      }
+
+      const response = await fetch('http://127.0.0.1:8000/api/loan-applications/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
 
       if (!response.ok) {
@@ -222,6 +239,38 @@ export default function Loans() {
                               lightColor="#64748b"
                               darkColor="#94a3b8"
                             >
+                              Purpose
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {loan.purpose}
+                            </ThemedText>
+                          </View>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Repayment Period
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {loan.repayment_period} months
+                            </ThemedText>
+                          </View>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
                               Balance Left
                             </ThemedText>
                             <ThemedText 
@@ -229,7 +278,7 @@ export default function Loans() {
                               lightColor="#1e293b"
                               darkColor="#f8fafc"
                             >
-                              {loan.balanceLeft ? formatAmount(loan.balanceLeft) : ''}
+                              {loan.balance_remaining ? formatAmount(loan.balance_remaining) : ''}
                             </ThemedText>
                           </View>
                           <View style={styles.loanDetail}>
@@ -245,46 +294,114 @@ export default function Loans() {
                               lightColor="#1e293b"
                               darkColor="#f8fafc"
                             >
-                              {formatDate(loan.nextPayment)}
+                              {formatDate(loan.next_payment_date)}
                             </ThemedText>
                           </View>
                         </>
                       )}
                       {loan.status === 'pending' && (
-                        <View style={styles.loanDetail}>
-                          <ThemedText 
-                            style={styles.detailLabel}
-                            lightColor="#64748b"
-                            darkColor="#94a3b8"
-                          >
-                            Requested On
-                          </ThemedText>
-                          <ThemedText 
-                            style={styles.detailValue}
-                            lightColor="#1e293b"
-                            darkColor="#f8fafc"
-                          >
-                            {formatDate(loan.requestDate)}
-                          </ThemedText>
-                        </View>
+                        <>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Purpose
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {loan.purpose}
+                            </ThemedText>
+                          </View>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Repayment Period
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {loan.repayment_period} months
+                            </ThemedText>
+                          </View>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Requested On
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {formatDate(loan.created_at)}
+                            </ThemedText>
+                          </View>
+                        </>
                       )}
                       {loan.status === 'completed' && (
-                        <View style={styles.loanDetail}>
-                          <ThemedText 
-                            style={styles.detailLabel}
-                            lightColor="#64748b"
-                            darkColor="#94a3b8"
-                          >
-                            Completed On
-                          </ThemedText>
-                          <ThemedText 
-                            style={styles.detailValue}
-                            lightColor="#1e293b"
-                            darkColor="#f8fafc"
-                          >
-                            {formatDate(loan.endDate)}
-                          </ThemedText>
-                        </View>
+                        <>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Purpose
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {loan.purpose}
+                            </ThemedText>
+                          </View>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Repayment Period
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {loan.repayment_period} months
+                            </ThemedText>
+                          </View>
+                          <View style={styles.loanDetail}>
+                            <ThemedText 
+                              style={styles.detailLabel}
+                              lightColor="#64748b"
+                              darkColor="#94a3b8"
+                            >
+                              Completed On
+                            </ThemedText>
+                            <ThemedText 
+                              style={styles.detailValue}
+                              lightColor="#1e293b"
+                              darkColor="#f8fafc"
+                            >
+                              {formatDate(loan.completed_at)}
+                            </ThemedText>
+                          </View>
+                        </>
                       )}
                     </View>
                   </ThemedView>
