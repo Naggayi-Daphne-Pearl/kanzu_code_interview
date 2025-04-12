@@ -1,7 +1,10 @@
+import React from 'react';
+import { View, Text } from 'react-native';
+
 export default function Index() {
   return (
-    <div className="bg-slate-100 rounded-xl">
-      <p className="text-lg font-medium">Welcome to Tailwind</p>
-    </div>
+    <View style={{ backgroundColor: 'slategray', borderRadius: 10, padding: 10 }}>
+      <Text style={{ fontSize: 18, fontWeight: '500' }}>Welcome to Tailwind</Text>
+    </View>
   );
 }
